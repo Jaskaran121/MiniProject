@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './form.css'
-import {getEvents} from './Services';
+import {getEvents,postEvents} from './Services';
 import { validateFields } from './validateFields';
 
 class Form extends Component {
@@ -16,6 +16,7 @@ class Form extends Component {
             events:{},
             currentCities:[],
             disabled : true,
+            totalData:[]
           }
     }
     async componentDidMount() {
@@ -36,18 +37,18 @@ class Form extends Component {
         data[input.target.name] = input.target.value
         this.setState({data})
     }
-    handleSubmit = (e) => {
+   handleSubmit =  async (e) => {
+        e.preventDefault()
         const {
             name,
-            email
+            email,
         } = this.state.data
-        const errors = validateFields(name,email)
-        if(errors)
-            {
-               window.alert(errors)
-               return
-            }
-        e.preventDefault()
+        const currentErrors = validateFields(name,email)
+        if(currentErrors){
+            return
+        }
+        const totalData = await postEvents(this.state.data);
+        console.log(totalData)
     }
     render() { 
         const {
@@ -60,7 +61,8 @@ class Form extends Component {
             currentCity,
             currentEvent,
             name,
-            email
+            email,
+            totalData
         } = data
         return ( <div className="form">
             <form onSubmit={this.handleSubmit}>
@@ -93,8 +95,11 @@ class Form extends Component {
             Your Email:
             <input type="text" name = 'email' value={email} onChange = {this.handleInputChange} disabled={disabled}/>
             </label><br/><br/>
-            <input type="submit" value="Submit"/>
+            <input type="submit" value="Submit" disabled={disabled}/>
             </form>
+            {totalData && <textarea>
+                {totalData}
+            </textarea>}
         </div>);
     }
 }
